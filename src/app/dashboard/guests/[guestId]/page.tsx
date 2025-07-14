@@ -7,7 +7,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 // A small helper component to display a piece of guest info
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value?: string | null }) {
+function InfoItem({ icon: Icon, value }: { icon: React.ElementType, label: string, value?: string | null }) {
     if (!value) return null;
     return (
         <div className="flex items-center gap-3">

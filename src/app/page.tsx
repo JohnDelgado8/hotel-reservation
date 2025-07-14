@@ -2,7 +2,7 @@
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PrismaClient, RoomStatus } from "@prisma/client"; // Import RoomStatus
-import Image from "next/image";
+
 
 const prisma = new PrismaClient();
 

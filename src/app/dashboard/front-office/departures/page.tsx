@@ -48,7 +48,7 @@ export default async function DeparturesListPage() {
                 <Link href="/dashboard/front-office" className={buttonVariants({ variant: "outline", size: "sm" })}>
                     ← Back to Front Office
                 </Link>
-                <h1 className="text-3xl font-bold mt-4">Today's Departure List</h1>
+                <h1 className="text-3xl font-bold mt-4">Todays Departure List</h1>
                 <p className="text-muted-foreground">
                     Guests scheduled to check out on {new Date().toLocaleDateString()}.
                 </p>

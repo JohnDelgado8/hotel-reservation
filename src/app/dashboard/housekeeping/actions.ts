@@ -33,6 +33,7 @@ export async function updateRoomStatusAction(roomId: string, status: RoomStatus)
     revalidatePath("/"); // Revalidate public page as availability might change
     return { success: true };
   } catch (error) {
+      console.error("Error Failed to update room status:", error);
     return { error: "Failed to update room status." };
   }
 }

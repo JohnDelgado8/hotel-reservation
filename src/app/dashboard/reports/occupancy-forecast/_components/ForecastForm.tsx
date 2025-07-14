@@ -38,6 +38,7 @@ export function ForecastForm() {
       setForecastData(result.forecastData);
       setTotalRooms(result.totalRooms);
     } catch (error) {
+      console.error("Error Failed to generate forecast:", error);
       toast.error("Failed to generate forecast.");
     } finally {
       setIsLoading(false);

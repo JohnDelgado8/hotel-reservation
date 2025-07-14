@@ -117,6 +117,7 @@ export async function updatePaymentStatusAction(bookingId: string) {
         revalidatePath('/dashboard/front-office');
         return { success: "Payment status updated to PAID." };
     } catch (error) {
+       console.error("Error during payment status update:", error);
         return { error: "Failed to update payment status." };
     }
 }
