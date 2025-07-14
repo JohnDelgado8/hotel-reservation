@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- USER & AUTH MODELS ---
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  password        String
+  role            UserRole  @default(STUDENT)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  createdRooms    Room[]    @relation("CreatedBy")
+  auditLogs       AuditLog[]
+  createdBookings Booking[] // User who created the booking
+}
+
+// --- HOTEL ASSET MODELS ---
+model Room {
+  id              String        @id @default(cuid())
+  roomNumber      String        @unique
+  type            RoomType
+  price           Float
+  status          RoomStatus    @default(AVAILABLE)
+  description     String
+  imageUrl        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  createdBy       User          @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById     String
+
+  bookings        Booking[]
+}
+
+// --- GUEST & BOOKING MODELS ---
+// Guest model updated with more details
+model Guest {
+  id              String    @id @default(cuid())
+  firstName       String
+  lastName        String
+  middleName      String?
+  email           String    @unique
+  phone           String?
+  title           String?   // e.g., Mr, Mrs, Ms
+  nationality     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  bookings        Booking[]
+}
+
+// Booking model significantly enhanced
+model Booking {
+  id               String        @id @default(cuid())
+  checkInDate      DateTime
+  checkOutDate     DateTime
+  status           BookingStatus @default(CONFIRMED)
+  totalAmount      Float
+  paymentStatus    PaymentStatus @default(PENDING)
+  
+  // New fields from your screenshot
+  adults           Int
+  kids             Int           @default(0)
+  source           String?       // e.g., Agoda, Booking.com, Direct
+  agent            String?
+  bookingRef       String?       // Booking Reference from Agent/Source
+  reservationType  String?       // e.g., Tentative, Guaranteed
+  rateCode         String?
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  
+  guest            Guest         @relation(fields: [guestId], references: [id])
+  guestId          String
+
+  room             Room?         @relation(fields: [roomId], references: [id]) // Optional: Can be booked without a room first
+  roomId           String?
+
+  bookedBy         User          @relation(fields: [bookedById], references: [id]) // Who made the booking
+  bookedById       String
+
+  payments         Payment[]     // A booking can have multiple payments
+}
+
+// New model for manual payments
+model Payment {
+  id               String      @id @default(cuid())
+  amount           Float
+  paymentType      String      // e.g., Cash, Credit Card, Bank Transfer
+  cardType         String?
+  cardNumber       String?
+  cardExpDate      String?
+  notes            String?
+  createdAt        DateTime    @default(now())
+
+  booking          Booking     @relation(fields: [bookingId], references: [id])
+  bookingId        String
+}
+
+// --- NIGHT AUDIT LOG ---
+model AuditLog {
+  id               String   @id @default(cuid())
+  runAt            DateTime @default(now())
+  businessDate     DateTime @unique
+  summary          Json
+  runBy            User     @relation(fields: [runByUserId], references: [id])
+  runByUserId      String
+}
+
+// --- ENUMS ---
+enum UserRole {
+  ADMIN
+  STUDENT
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  SUITE
+  DELUXE
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+  DIRTY
+  CLEANING
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  REFUNDED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
