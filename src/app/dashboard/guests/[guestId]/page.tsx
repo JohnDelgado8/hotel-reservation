@@ -5,23 +5,37 @@ import { User, Mail, Phone, Globe, Calendar, DollarSign } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import React from "react"; // Import React
+
+// THE FIX IS HERE: We define the props type separately
+type InfoItemProps = {
+  icon: React.ElementType;
+  label: string;
+  value?: string | null;
+};
 
 // A small helper component to display a piece of guest info
-// FIX #1: Added 'label' to the function's parameter destructuring
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
+function InfoItem({ icon: Icon, label, value }: InfoItemProps) {
     if (value === null || value === undefined || value === '') return null;
     return (
         <div className="flex items-start gap-4 py-2">
             <Icon className="h-5 w-5 text-muted-foreground mt-1" />
             <div>
                 <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                <p className="text-sm text-primary">{value}</p>
+                <p className="text-sm text-primary font-medium">{value}</p>
             </div>
         </div>
     );
 }
 
-export default async function GuestProfilePage({ params }: { params: { guestId: string } }) {
+// Type for the main page props for clarity
+type GuestProfilePageProps = {
+  params: {
+    guestId: string;
+  };
+};
+
+export default async function GuestProfilePage({ params }: GuestProfilePageProps) {
     const guest = await prisma.guest.findUnique({
         where: { id: params.guestId },
         include: {
@@ -55,7 +69,6 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
                         <User className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <div>
-                        {/* FIX #2: Use firstName and lastName instead of name */}
                         <h1 className="text-3xl font-bold">{guest.firstName} {guest.lastName}</h1>
                         <p className="text-muted-foreground">{guest.email}</p>
                     </div>
@@ -68,7 +81,6 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
                         <CardTitle>Contact Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-1">
-                        {/* FIX #3: Use firstName and lastName here too */}
                         <InfoItem icon={User} label="Full Name" value={`${guest.title || ''} ${guest.firstName} ${guest.lastName}`} />
                         <InfoItem icon={Mail} label="Email Address" value={guest.email} />
                         <InfoItem icon={Phone} label="Phone Number" value={guest.phone} />
@@ -79,7 +91,7 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
                     <CardHeader>
                         <CardTitle>Guest Statistics</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4">
+                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex items-center p-4 bg-secondary/50 rounded-lg">
                            <Calendar className="h-8 w-8 text-blue-500 mr-4"/>
                            <div>
@@ -111,20 +123,21 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {guest.bookings.map(booking => (
-                                <TableRow key={booking.id}>
-                                    <TableCell>
-                                        <div className="font-medium">{booking.room?.roomNumber || 'N/A'}</div>
-                                        <div className="text-sm text-muted-foreground">{booking.room?.type || ''}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell>{booking.status}</TableCell>
-                                    <TableCell className="text-right">${booking.totalAmount.toFixed(2)}</TableCell>
-                                </TableRow>
-                            ))}
-                             {guest.bookings.length === 0 && (
+                            {guest.bookings.length > 0 ? (
+                                guest.bookings.map(booking => (
+                                    <TableRow key={booking.id}>
+                                        <TableCell>
+                                            <div className="font-medium">{booking.room?.roomNumber || 'N/A'}</div>
+                                            <div className="text-sm text-muted-foreground">{booking.room?.type || ''}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell>{booking.status}</TableCell>
+                                        <TableCell className="text-right">${booking.totalAmount.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
                                 <TableRow>
                                     <TableCell colSpan={4} className="h-24 text-center">No booking history found.</TableCell>
                                 </TableRow>
