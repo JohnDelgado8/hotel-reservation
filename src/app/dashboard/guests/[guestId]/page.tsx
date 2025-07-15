@@ -1,3 +1,5 @@
+// src/app/dashboard/guests/[guestId]/page.tsx
+
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,15 +19,15 @@ function InfoItem({ icon: Icon, value }: { icon: React.ElementType, label: strin
     );
 }
 
-// Define a specific type for the page props, matching the dynamic route parameter.
-interface GuestProfilePageProps {
-    params: {
-        guestId: string;
-    };
-}
-
-// Use the specific type for the component's props to resolve the type error.
-export default async function GuestProfilePage({ params }: GuestProfilePageProps) {
+// ==================================================================
+// THE FIX IS APPLIED HERE - INLINE TYPE DEFINITION
+// We define the shape of the props directly in the function signature.
+// ==================================================================
+export default async function GuestProfilePage({ 
+    params 
+}: { 
+    params: { guestId: string } 
+}) {
     // Fetch the guest and ALL their bookings, including related room info
     const guest = await prisma.guest.findUnique({
         where: { id: params.guestId },
