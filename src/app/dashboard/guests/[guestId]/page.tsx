@@ -6,29 +6,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
-// ==================================================================
-// THE CORRECTLY DEFINED AND USED HELPER COMPONENT
-// It now displays the label and the value in a clean, two-column layout.
-// ==================================================================
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
+// A small helper component to display a piece of guest info
+function InfoItem({ icon: Icon, value }: { icon: React.ElementType, label: string, value?: string | null }) {
     if (!value) return null;
     return (
-        <div className="flex items-start justify-between gap-4 py-2 border-b">
-            <div className="flex items-center gap-3">
-                <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <span className="text-sm font-medium text-muted-foreground">{label}</span>
-            </div>
-            <span className="text-sm text-right font-semibold">{value}</span>
+        <div className="flex items-center gap-3">
+            <Icon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{value}</span>
         </div>
     );
 }
 
-// This is the correct, inline type definition for the page props.
-export default async function GuestProfilePage({
-  params,
-}: {
-  params: { guestId: string };
-}) {
+// Define a specific type for the page props, matching the dynamic route parameter.
+interface GuestProfilePageProps {
+    params: {
+        guestId: string;
+    };
+}
+
+// Use the specific type for the component's props to resolve the type error.
+export default async function GuestProfilePage({ params }: GuestProfilePageProps) {
+    // Fetch the guest and ALL their bookings, including related room info
     const guest = await prisma.guest.findUnique({
         where: { id: params.guestId },
         include: {
@@ -55,7 +53,7 @@ export default async function GuestProfilePage({
 
     return (
         <div className="space-y-8">
-            {/* Header section */}
+            {/* Header section with back button and guest name */}
             <div>
                 <Link href="/dashboard/guests" className={buttonVariants({ variant: "outline", size: "sm" })}>
                     ← Back to Guests
@@ -71,22 +69,17 @@ export default async function GuestProfilePage({
                 </div>
             </div>
 
-            {/* Details & Stats Cards */}
+            {/* Guest Details & Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="md:col-span-1">
                     <CardHeader>
                         <CardTitle>Contact Information</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        {/* ================================================== */}
-                        {/* THE FIX: We are now correctly passing BOTH the 'label' and 'value' props. */}
-                        {/* ================================================== */}
-                        <dl>
-                           <InfoItem icon={User} label="Full Name" value={`${guest.title || ''} ${guestFullName}`} />
-                           <InfoItem icon={Mail} label="Email" value={guest.email} />
-                           <InfoItem icon={Phone} label="Phone" value={guest.phone} />
-                           <InfoItem icon={Globe} label="Nationality" value={guest.nationality} />
-                        </dl>
+                    <CardContent className="space-y-3">
+                        <InfoItem icon={User} label="Name" value={`${guest.title || ''} ${guestFullName}`} />
+                        <InfoItem icon={Mail} label="Email" value={guest.email} />
+                        <InfoItem icon={Phone} label="Phone" value={guest.phone} />
+                        <InfoItem icon={Globe} label="Nationality" value={guest.nationality} />
                     </CardContent>
                 </Card>
                 <Card className="md:col-span-1">
