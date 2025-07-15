@@ -1,11 +1,11 @@
-"use client"; // Good practice to mark components with hooks as client components
+"use client"; // This component uses no hooks, but marking it is fine.
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, Globe, Calendar, DollarSign } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { type GuestWithBookings } from "../page"; // We will export this type from our page.tsx
+import { type GuestWithBookings } from "../page";
 
 // Helper component for info items
 function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
