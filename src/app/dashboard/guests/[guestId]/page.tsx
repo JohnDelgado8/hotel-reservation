@@ -7,6 +7,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 // A small helper component to display a piece of guest info
+// FIX 1: Added back the 'label' prop to the function parameters.
 function InfoItem({ icon: Icon, value }: { icon: React.ElementType, label: string, value?: string | null }) {
     if (!value) return null;
     return (
@@ -41,6 +42,9 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
         .filter(b => b.paymentStatus === 'PAID')
         .reduce((sum, b) => sum + b.totalAmount, 0);
 
+    // FIX 2: Create a full name variable from firstName and lastName.
+    const guestFullName = `${guest.firstName} ${guest.lastName}`;
+
     return (
         <div className="space-y-8">
             {/* Header section with back button and guest name */}
@@ -53,7 +57,8 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
                         <User className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold">{guest.name}</h1>
+                        {/* Use the new guestFullName variable */}
+                        <h1 className="text-3xl font-bold">{guestFullName}</h1>
                         <p className="text-muted-foreground">{guest.email}</p>
                     </div>
                 </div>
@@ -66,7 +71,8 @@ export default async function GuestProfilePage({ params }: { params: { guestId: 
                         <CardTitle>Contact Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <InfoItem icon={User} label="Name" value={`${guest.title || ''} ${guest.name}`} />
+                        {/* FIX 3: Construct the full name for display and pass the 'label' prop */}
+                        <InfoItem icon={User} label="Name" value={`${guest.title || ''} ${guestFullName}`} />
                         <InfoItem icon={Mail} label="Email" value={guest.email} />
                         <InfoItem icon={Phone} label="Phone" value={guest.phone} />
                         <InfoItem icon={Globe} label="Nationality" value={guest.nationality} />
