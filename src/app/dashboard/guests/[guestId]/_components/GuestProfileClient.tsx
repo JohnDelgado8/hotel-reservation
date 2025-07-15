@@ -1,3 +1,5 @@
+"use client"; // Good practice to mark components with hooks as client components
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, Globe, Calendar, DollarSign } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -5,7 +7,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { type GuestWithBookings } from "../page"; // We will export this type from our page.tsx
 
-// Helper component for info items - it is now defined and used correctly here.
+// Helper component for info items
 function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
     if (!value) return null;
     return (
@@ -19,7 +21,7 @@ function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label
     );
 }
 
-// This component receives the fully-loaded 'guest' object as a prop.
+// This component receives the fully-loaded 'guest' object as a prop and renders the UI.
 export function GuestProfileClient({ guest }: { guest: GuestWithBookings }) {
     
     const totalSpent = guest.bookings
