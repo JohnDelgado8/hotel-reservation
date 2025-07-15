@@ -2,26 +2,38 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { GuestSearch } from "./_components/GuestSearch";
-import Link from "next/link";
-// import { buttonVariants } from "@/components/ui/button";
+import { ViewGuestModal } from "./_components/ViewGuestModal";
+import { Prisma } from "@prisma/client";
+
+// We define and export this type so our ViewGuestModal component can import it.
+// This gives us perfect type safety.
+export type GuestWithAllDetails = Prisma.GuestGetPayload<{
+    include: {
+        bookings: {
+            include: {
+                room: true
+            }
+        }
+    }
+}>;
 
 export default async function GuestsPage({ searchParams }: { searchParams?: { query?: string } }) {
     const query = searchParams?.query || '';
     
-    // THE FIX IS IN THIS 'where' CLAUSE
+    // The query now fetches all guests and their complete booking histories at once.
     const guests = await prisma.guest.findMany({
         where: {
-            // We search across multiple fields to get the best results
             OR: [
-                // Search if the query appears in the first name
                 { firstName: { contains: query, mode: 'insensitive' } },
-                // Search if the query appears in the last name
                 { lastName: { contains: query, mode: 'insensitive' } },
-                // Search if the query appears in the email
                 { email: { contains: query, mode: 'insensitive' } },
-                // A more advanced (but slower) search for full name would require raw SQL or a dedicated search service.
-                // This OR approach is very effective for most use cases.
             ],
+        },
+        include: {
+            bookings: {
+                include: { room: true },
+                orderBy: { checkInDate: 'desc' }
+            }
         },
         orderBy: { createdAt: 'desc' }
     });
@@ -39,7 +51,8 @@ export default async function GuestsPage({ searchParams }: { searchParams?: { qu
                             <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Phone</TableHead>
-                            <TableHead>Member Since</TableHead>
+                            <TableHead>Total Bookings</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -47,19 +60,20 @@ export default async function GuestsPage({ searchParams }: { searchParams?: { qu
                             guests.map((guest) => (
                                 <TableRow key={guest.id}>
                                     <TableCell className="font-medium">
-                                        <Link href={`/dashboard/guests/${guest.id}`} className="hover:underline">
-                                            {/* We construct the full name for display */}
-                                            {guest.firstName} {guest.lastName}
-                                        </Link>
+                                        {guest.firstName} {guest.lastName}
                                     </TableCell>
                                     <TableCell>{guest.email}</TableCell>
                                     <TableCell>{guest.phone || 'N/A'}</TableCell>
-                                    <TableCell>{new Date(guest.createdAt).toLocaleDateString()}</TableCell>
+                                    <TableCell>{guest.bookings.length}</TableCell>
+                                    <TableCell className="text-right">
+                                        {/* Each guest row now has a modal button with all their data */}
+                                        <ViewGuestModal guest={guest} />
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
+                                <TableCell colSpan={5} className="h-24 text-center">
                                     No guests found.
                                 </TableCell>
                             </TableRow>
